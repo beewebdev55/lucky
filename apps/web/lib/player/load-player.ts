@@ -1,9 +1,9 @@
 /** player integration: load element.js as an ES module script (never webpack-bundle it). */
 import { PLAYER_ASSET_VERSION } from "@/lib/player/player-asset.generated";
 
-export const PLAYER_SCRIPT = `/vendor/player/element.js?v=${PLAYER_ASSET_VERSION}`;
+export const PLAYER_SCRIPT = `/vendor/movi-player/element.js?v=${PLAYER_ASSET_VERSION}`;
 export const MOVI_PLAYER_SCRIPT = PLAYER_SCRIPT;
-export const MOVI_PLAYER_COMPAT_SCRIPT = `/vendor/player/compat.js?v=${PLAYER_ASSET_VERSION}`;
+export const MOVI_PLAYER_COMPAT_SCRIPT = `/vendor/movi-player/compat.js?v=${PLAYER_ASSET_VERSION}`;
 
 const PLAYER_VERSION_STORAGE_KEY = "movi-player-asset-version";
 
