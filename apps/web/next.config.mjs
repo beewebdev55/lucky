@@ -11,8 +11,7 @@ const moviPlayerResolveAliases = {
 };
 
 const CDN_ORIGIN = (
-  process.env.NEXT_PUBLIC_CDN_ORIGIN ??
-  (process.env.NODE_ENV === "production" ? "https://cdn.cuevana33.lat" : "")
+  process.env.NEXT_PUBLIC_CDN_ORIGIN ?? ""
 ).replace(/\/$/, "");
 
 const nextConfig = {
