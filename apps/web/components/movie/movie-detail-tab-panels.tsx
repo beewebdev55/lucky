@@ -1,0 +1,158 @@
+"use client";
+
+import { ExpandableCastGrid } from "@/components/media/expandable-cast-grid";
+import { MovieCard } from "@/components/movie/movie-card";
+import { MovieOverviewTab } from "@/components/movie/movie-overview-tab";
+import {
+  fetchMovieCreditsClient,
+  fetchMovieDetailsClient,
+  fetchMovieRecommendationsPageClient,
+} from "@/lib/media-detail-tab-client";
+import { queryKeys } from "@/lib/query-keys";
+import { cn } from "@/lib/utils";
+import type { MovieDetails } from "@/tmdb/models";
+import { useQuery } from "@tanstack/react-query";
+import { Suspense, type ReactNode } from "react";
+
+type MovieDetailTabPanelsProps = {
+  movieId: string;
+};
+
+type DetailSectionProps = {
+  title: string;
+  children: ReactNode;
+};
+
+const DetailSection = ({ title, children }: DetailSectionProps) => (
+  <section className="scroll-mt-24">
+    <h2
+      className={cn(
+        "mb-5 flex items-center gap-3 text-2xl font-semibold text-foreground sm:text-3xl",
+      )}
+    >
+      <span className="h-8 w-1 rounded-full bg-primary" aria-hidden />
+      {title}
+    </h2>
+    {children}
+  </section>
+);
+
+const OverviewFallback = () => (
+  <DetailSection title="Sinopsis">
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <div className="h-4 w-full rounded bg-card/50" />
+        <div className="h-4 w-11/12 rounded bg-card/50" />
+        <div className="h-4 w-3/4 rounded bg-card/50" />
+      </div>
+      <div className="h-64 rounded-xl border border-white/15 bg-black/25" />
+    </div>
+  </DetailSection>
+);
+
+const GridSectionFallback = ({ title }: { title: string }) => (
+  <DetailSection title={title}>
+    <div className="grid-list">
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div
+          key={index}
+          className="aspect-poster rounded-lg border border-border/60 bg-card/25"
+        />
+      ))}
+    </div>
+  </DetailSection>
+);
+
+const OverviewSection = ({ movieId }: MovieDetailTabPanelsProps) => {
+  const numId = Number.parseInt(movieId, 10);
+
+  const { data: raw, isPending } = useQuery({
+    queryKey: queryKeys.movieDetails(numId),
+    queryFn: async () => {
+      const movie = await fetchMovieDetailsClient(movieId);
+      if (!movie || !("title" in movie)) throw new Error("Movie not found");
+      return movie;
+    },
+  });
+
+  if (isPending && !raw) return <OverviewFallback />;
+
+  return (
+    <DetailSection title="Sinopsis">
+      <MovieOverviewTab
+        details={raw as unknown as MovieDetails}
+        showOverviewHeading={false}
+      />
+    </DetailSection>
+  );
+};
+
+const CastSection = ({ movieId }: MovieDetailTabPanelsProps) => {
+  const { data: credits, isPending } = useQuery({
+    queryKey: queryKeys.movieTabCredits(movieId),
+    queryFn: () => fetchMovieCreditsClient(movieId),
+  });
+
+  if (isPending && !credits) return <GridSectionFallback title="Elenco" />;
+
+  if (!credits) return <GridSectionFallback title="Elenco" />;
+
+  return (
+    <DetailSection title="Elenco">
+      {credits.cast?.length ? (
+        <ExpandableCastGrid cast={credits.cast} />
+      ) : (
+        <div className="empty-box">No hay información del elenco disponible</div>
+      )}
+    </DetailSection>
+  );
+};
+
+const RecommendationsSection = ({ movieId }: MovieDetailTabPanelsProps) => {
+  const { data: recommendationsData, isPending } = useQuery({
+    queryKey: queryKeys.movieTabRecommendations(movieId, "1"),
+    queryFn: () => fetchMovieRecommendationsPageClient(movieId, "1"),
+  });
+
+  if (isPending && !recommendationsData) {
+    return <GridSectionFallback title="Te Podría Gustar" />;
+  }
+
+  if (!recommendationsData) {
+    return <GridSectionFallback title="Te Podría Gustar" />;
+  }
+
+  return (
+    <DetailSection title="Te Podría Gustar">
+      {recommendationsData.results?.length ? (
+        <section className="grid-list">
+          {recommendationsData.results.map((movie) => (
+            <MovieCard key={movie.id} {...movie} variant="linkOnly" />
+          ))}
+        </section>
+      ) : (
+        <div className="empty-box">No hay recomendaciones disponibles</div>
+      )}
+    </DetailSection>
+  );
+};
+
+export const MovieDetailTabPanels = ({
+  movieId,
+}: MovieDetailTabPanelsProps) => {
+  return (
+    <div className="space-y-8">
+      <Suspense fallback={<OverviewFallback />}>
+        <OverviewSection movieId={movieId} />
+      </Suspense>
+
+      <Suspense fallback={<GridSectionFallback title="Elenco" />}>
+        <CastSection movieId={movieId} />
+      </Suspense>
+
+      <Suspense fallback={<GridSectionFallback title="Te Podría Gustar" />}>
+        <RecommendationsSection movieId={movieId} />
+      </Suspense>
+    </div>
+  );
+};
