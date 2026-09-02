@@ -1,5 +1,16 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "TMDB_API_KEY",
+    "TMDB_READ_ACCESS_TOKEN",
+    "DATABASE_URL",
+    "DIRECT_URL",
+    "AUTH_SECRET",
+    "APP_URL",
+    "AUTH_URL",
+    "NEXTAUTH_URL",
+    "NODE_ENV"
+  ],
   "tasks": {
     "build:wasm": {
       "cache": true,

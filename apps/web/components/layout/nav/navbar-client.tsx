@@ -30,10 +30,10 @@ const DETAIL_PARENT_ROUTES: Array<{
   pattern: RegExp;
   parent: string;
 }> = [
-  { pattern: /^\/movies\/[^/]+(?:\/.*)?$/, parent: "/peliculas" },
-  { pattern: /^\/tvshows\/[^/]+(?:\/.*)?$/, parent: "/series" },
+  { pattern: /^\/peliculas\/[^/]+(?:\/.*)?$/, parent: "/peliculas" },
+  { pattern: /^\/series\/[^/]+(?:\/.*)?$/, parent: "/series" },
   { pattern: /^\/anime\/[^/]+(?:\/.*)?$/, parent: "/anime" },
-  { pattern: /^\/person\/[^/]+(?:\/.*)?$/, parent: "/personaas" },
+  { pattern: /^\/persona\/[^/]+(?:\/.*)?$/, parent: "/personas" },
   {
     pattern: /^\/collection\/[^/]+(?:\/.*)?$/,
     parent: "/peliculas",
@@ -57,13 +57,13 @@ export const NavbarClient = () => {
   const isCatalogRoute = (pathname: string) => {
     const patterns = [
       /^\/$/,
-      /^\/movies(?:\/(?:browse|now-playing|popular|top-rated|upcoming))?$/,
-      /^\/tvshows(?:\/(?:airing-today|browse|on-the-air|popular|top-rated))?$/,
+      /^\/peliculas(?:\/(?:browse|now-playing|popular|top-rated|upcoming))?$/,
+      /^\/series(?:\/(?:airing-today|browse|on-the-air|popular|top-rated))?$/,
       /^\/anime$/,
       ...(liveTvEnabled ? [/^\/live$/] : []),
-      /^\/trending(?:\/(?:movie|people|tv))?$/,
+      /^\/tendencias(?:\/(?:movie|people|tv))?$/,
       /^\/browse\/(?:country|genre)\/[^/]+$/,
-      /^\/people\/popular$/,
+      /^\/personas\/popular$/,
     ];
     return patterns.some((pattern) => pattern.test(pathname));
   };
